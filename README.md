@@ -20,7 +20,7 @@ Worker is a daemon that runs on different machines and executes scraping tasks.
 ### Worker
 
 ```bash
-docker run --name wakizashi-worker -d --restart always -e MQ_URI="amqp://guest:<mq_pass>@<ip>:5672" worker
+docker run --name wakizashi-worker -d --restart always -e MQ_URI="amqp://guest:<mq_pass>@<ip>:5672" ghcr.io/sparksecurity/wakizashi-worker:main
 ```
 
 ## API

@@ -33,7 +33,7 @@ services:
       - "15672:15672"
 
   manager:
-    image: manager
+    image: ghcr.io/sparksecurity/wakizashi-manager:main
     restart: always
     environment:
       LISTEN_PORT: 3033
@@ -49,7 +49,7 @@ services:
       - wakizashi
 
 #  worker:
-#    image: worker
+#    image: ghcr.io/sparksecurity/wakizashi-worker:main
 #    restart: always
 #    environment:
 #      MQ_URI: "amqp://guest:${mq_pass}@rabbit:5672"
