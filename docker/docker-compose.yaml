@@ -48,15 +48,15 @@ services:
     networks:
       - wakizashi
 
-  worker:
-    image: worker
-    restart: always
-    environment:
-      MQ_URI: "amqp://guest:${mq_pass}@rabbit:5672"
-    depends_on:
-      - manager
-    networks:
-      - wakizashi
+#  worker:
+#    image: worker
+#    restart: always
+#    environment:
+#      MQ_URI: "amqp://guest:${mq_pass}@rabbit:5672"
+#    depends_on:
+#      - manager
+#    networks:
+#      - wakizashi
 
 networks:
   wakizashi:
