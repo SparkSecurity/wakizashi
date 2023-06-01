@@ -3,23 +3,35 @@ package util
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
 	"github.com/SparkSecurity/wakizashi/manager/model"
 	"io"
 )
 
 // ZipFile takes a list of pages and zips them into a single file
 // Returns the zip file as a byte array
-func ZipFile(pages []model.Page, stream io.Writer) error {
+type fileIndex struct {
+	ID       string `json:"id"`
+	Url      string `json:"url"`
+	BodyHash string `json:"bodyHash"`
+}
 
+func ZipFile(pages []model.Page, stream io.Writer) error {
+	var index []fileIndex
 	zipWriter := zip.NewWriter(stream)
 	defer zipWriter.Close()
 
+	s256 := sha256.New()
 	// For each page, create a file with just the response body
 	for _, page := range pages {
-
+		s256.Reset()
+		s256.Write([]byte(page.Response))
+		hash := fmt.Sprintf("%x", s256.Sum(nil))
 		// Stream response body into buffer -> io.stream -> zipWriter
-		buffer := bytes.NewBufferString(page.Response)     // hum then i guess store as jsons in a zip, with filename <id>.json and the content is json
-		fileStream, err := zipWriter.Create(page.ID.Hex()) // hia but that will fuck the ability of normally open that zip
+		buffer := bytes.NewBufferString(page.Response)
+		fileStream, err := zipWriter.Create("data/" + hash)
 		if err != nil {
 			return err
 		}
@@ -28,7 +40,19 @@ func ZipFile(pages []model.Page, stream io.Writer) error {
 		if err != nil {
 			return err
 		}
+		index = append(index, fileIndex{
+			ID:       page.ID.Hex(),
+			Url:      page.Url,
+			BodyHash: hash,
+		})
 	}
-
+	fileStream, err := zipWriter.Create("index.json")
+	if err != nil {
+		return err
+	}
+	err = json.NewEncoder(fileStream).Encode(index)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -162,9 +162,9 @@ func DownloadTask(c *gin.Context) {
 
 	// zip the pages and send it back
 	c.Writer.Header().Set("Content-type", "application/octet-stream")
-	c.Writer.Header().Set("Content-Disposition", `attachment; filename='`+task.Name+`.zip'`)
+	c.Writer.Header().Set("Content-Disposition", `attachment; filename=`+task.Name+`.zip`)
 	c.Stream(func(w io.Writer) bool {
-		err := util.ZipFile(pages, w)
+		err := util.ZipFile(successfulPages, w)
 		if err != nil {
 			log.Println(err)
 			return false
@@ -189,7 +189,7 @@ func GetStats(c *gin.Context) {
 	}
 
 	// Get the statistics
-	stats, err := util.GetStatistics(taskID)
+	stats, err := GetStatistics(taskID)
 	if err != nil {
 		c.AbortWithStatus(500)
 		log.Println(err)
@@ -198,4 +198,65 @@ func GetStats(c *gin.Context) {
 
 	// Serialize the statistics
 	c.JSON(200, stats)
+}
+
+type stats struct {
+	TotalPages int64 `json:"total"`
+	Successful int64 `json:"successful"`
+	Failed     int64 `json:"failed"`
+	InProgress int64 `json:"inProgress"`
+}
+
+type aggregateResult struct {
+	Status int64 `bson:"_id"`
+	Count  int64 `bson:"count"`
+}
+
+// GetStatistics is a helper function to get statistics for a given task
+// accepts a list of pages and returns a statistics struct
+func GetStatistics(taskID primitive.ObjectID) (*stats, error) {
+	ctx, cancel := util.TimeoutContext(5 * time.Second)
+	defer cancel()
+
+	// Search db for all pages related to the task
+	cursor, err := db.DB.Collection("page").Aggregate(ctx, bson.A{
+		bson.D{
+			{"$match", bson.D{
+				{"taskID", taskID},
+			}},
+		},
+		bson.D{
+			{"$group", bson.D{
+				{"_id", "$status"},
+				{"count", bson.D{
+					{"$count", bson.D{}},
+				}},
+			}},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	// Convert the cursor to a list of aggregate results
+	var dbResult []aggregateResult
+	err = cursor.All(ctx, &dbResult)
+	if err != nil {
+		return nil, err
+	}
+
+	// Count
+	var result stats
+	for _, r := range dbResult {
+		switch r.Status {
+		case model.PAGE_STATUS_PENDING_SCRAPE:
+			result.InProgress = r.Count
+		case model.PAGE_STATUS_SCRAPE_SUCCESS:
+			result.Successful = r.Count
+		case model.PAGE_STATUS_SCRAPE_FAILED:
+			result.Failed = r.Count
+		}
+		result.TotalPages += r.Count
+	}
+
+	return &result, nil
 }

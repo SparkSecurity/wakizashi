@@ -4,25 +4,22 @@ services:
   mongo:
     image: mongo
     restart: always
-    container_name: mongodb
-    hostname: mongodb
+    container_name: mongo
+    hostname: mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: ${db_pass}
       MONGO_INITDB_DATABASE: wakizashi
       MONGO_REPLICA_SET_NAME: rs0
+    networks:
+      - wakizashi-dev
+    volumes:
+      - mongodb:/data
     ports:
       - "27017:27017"
-    networks:
-      - wakizashi
-    volumes:
-      - ./:/opt/keyfile/
-      - mongodb:/data
     healthcheck:
       test: |
-        test $$(mongosh --quiet -u root -p root --eval "try { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'db' }] }).ok } catch (_) { rs.status().ok }") -eq 1
+        test $$(mongosh --quiet --eval "try { rs.initiate().ok } catch (_) { rs.status().ok }") -eq 1
       interval: 10s
-    command: "--bind_ip_all --keyFile /opt/keyfile/keyfile --replSet rs0"
+    command: "--bind_ip_all --replSet rs0"
 
   rabbit:
     image: rabbitmq:3-management
@@ -32,13 +29,13 @@ services:
     volumes:
       - rabbitmq:/var/lib/rabbitmq
     networks:
-      - wakizashi
+      - wakizashi-dev
     ports:
       - "5672:5672"
       - "15672:15672"
 
 networks:
-  wakizashi:
+  wakizashi-dev:
 
 volumes:
   rabbitmq:

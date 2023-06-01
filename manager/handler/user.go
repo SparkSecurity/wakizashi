@@ -83,7 +83,13 @@ func AuthMiddlewareGetTask(c *gin.Context) {
 	result := db.DB.Collection("task").FindOne(ctx, bson.D{
 		{"_id", taskIDObj},
 	})
-
+	if result.Err() == mongo.ErrNoDocuments {
+		c.JSON(400, gin.H{
+			"error": "task not found",
+		})
+		c.Abort()
+		return
+	}
 	// Check if the user owns the task
 	var task model.Task
 	err = result.Decode(&task)

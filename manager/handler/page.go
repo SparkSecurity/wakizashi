@@ -13,8 +13,7 @@ import (
 )
 
 type CreatePagesRequest struct {
-	TaskID string   `json:"id"   binding:"required"`
-	Urls   []string `json:"urls" binding:"required"`
+	Urls []string `json:"urls" binding:"required"`
 }
 
 // CreatePages is used for appending pages onto a task
@@ -27,50 +26,21 @@ func CreatePages(c *gin.Context) {
 		return
 	}
 
-	user := GetUser(c)
+	// Get the task from context
+	var task model.Task
+	taskC, _ := c.Get("task")
+	task = taskC.(model.Task)
 
 	// 10 seconds to modify db
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
-	// Gets task from id and find it in db
-	taskID, err := primitive.ObjectIDFromHex(request.TaskID)
-	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid task id"})
-		c.Abort()
-		return
-	}
-
-	res := db.DB.Collection("task").FindOne(ctx, bson.D{{
-		"_id", taskID,
-	}})
-	if res.Err() != nil {
-		c.JSON(400, gin.H{"error": "task does not exist"})
-		c.Abort()
-		return
-	}
-
-	// Decode the task from db
-	var task model.Task
-	err = res.Decode(&task)
-	if err != nil {
-		c.AbortWithStatus(500)
-		log.Println(err)
-		return
-	}
-
-	// check for user fuckywuckies
-	if task.UserID != user.ID {
-		c.AbortWithStatus(403)
-		return
-	}
 
 	// Make an array to store pages to add to db
 	pages := make([]interface{}, len(request.Urls))
 	for i, url := range request.Urls {
 		pages[i] = model.Page{
 			ID:     primitive.NewObjectID(),
-			TaskID: taskID,
+			TaskID: task.ID,
 			Url:    url,
 			Status: model.PAGE_STATUS_PENDING_SCRAPE,
 		}

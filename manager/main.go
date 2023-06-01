@@ -28,15 +28,14 @@ func main() {
 
 	authRequired.POST("/task", handler.CreateTask)
 	authRequired.GET("/task", handler.ListTask)
-	authRequired.PUT("/task", handler.CreatePages)
 
 	// For task based tasks
-	authTaskRequired := router.Group("")
-	authTaskRequired.Use(handler.AuthMiddleware)
-	authTaskRequired.Use(handler.AuthMiddlewareGetTask)
+	taskRequired := authRequired.Group("")
+	taskRequired.Use(handler.AuthMiddlewareGetTask)
 
-	authTaskRequired.GET("/task/:id", handler.DownloadTask)
-	authTaskRequired.GET("/task/:id/statistics", handler.GetStats)
+	taskRequired.GET("/task/:id", handler.DownloadTask)
+	taskRequired.PUT("/task/:id", handler.CreatePages)
+	taskRequired.GET("/task/:id/statistics", handler.GetStats)
 
 	// Start
 	err := router.Run(fmt.Sprintf(":%d", config.Config.ListenPort))
