@@ -104,19 +104,26 @@ func CreatePages(c *gin.Context) {
 	c.Status(200)
 }
 
+// UpdatePageStatus updates the db of pages
 func UpdatePageStatus(success bool, task db.ScrapeTask) {
 	// 10 seconds to modify db
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	// Set the status of the page
 	newStatus := model.PAGE_STATUS_SCRAPE_SUCCESS
 	if !success {
 		newStatus = model.PAGE_STATUS_SCRAPE_FAILED
 	}
+
+	// Find object id in order to search
 	oid, err := primitive.ObjectIDFromHex(task.ID)
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
+	// Update the page in the db
 	_, err = db.DB.Collection("page").UpdateByID(
 		ctx,
 		oid,

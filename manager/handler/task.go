@@ -4,10 +4,12 @@ import (
 	"context"
 	"github.com/SparkSecurity/wakizashi/manager/db"
 	"github.com/SparkSecurity/wakizashi/manager/model"
+	"github.com/SparkSecurity/wakizashi/manager/util"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"io"
 	"log"
 	"time"
 )
@@ -118,4 +120,82 @@ func ListTask(c *gin.Context) {
 		return
 	}
 	c.JSON(200, tasks)
+}
+
+// DownloadTask downloads all pages for a given task at its current state
+func DownloadTask(c *gin.Context) {
+	// Get the task from context
+	var task model.Task
+	taskC, _ := c.Get("task")
+	task = taskC.(model.Task)
+
+	// Get all pages for the task
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cursor, err := db.DB.Collection("page").Find(ctx, bson.D{
+		{"taskID", task.ID},
+	})
+	if err != nil {
+		c.AbortWithStatus(500)
+		log.Println(err)
+		return
+	}
+
+	var pages []model.Page
+	err = cursor.All(ctx, &pages)
+	if err != nil {
+		c.AbortWithStatus(500)
+		log.Println(err)
+		return
+	}
+
+	// Loop through each page to find completed ones
+	successfulPages := make([]model.Page, 0)
+	for _, page := range pages {
+		if page.Status != model.PAGE_STATUS_SCRAPE_SUCCESS {
+			continue
+		}
+
+		successfulPages = append(successfulPages, page)
+	}
+
+	// zip the pages and send it back
+	c.Writer.Header().Set("Content-type", "application/octet-stream")
+	c.Writer.Header().Set("Content-Disposition", `attachment; filename='`+task.Name+`.zip'`)
+	c.Stream(func(w io.Writer) bool {
+		err := util.ZipFile(pages, w)
+		if err != nil {
+			log.Println(err)
+			return false
+		}
+
+		return false
+	})
+}
+
+func GetStats(c *gin.Context) {
+	// Get the task from context
+	var task model.Task
+	taskC, _ := c.Get("task")
+	task = taskC.(model.Task)
+
+	// Get the object ID of the task
+	taskID, err := primitive.ObjectIDFromHex(task.ID.Hex())
+	if err != nil {
+		c.AbortWithStatus(500)
+		log.Println(err)
+		return
+	}
+
+	// Get the statistics
+	stats, err := util.GetStatistics(taskID)
+	if err != nil {
+		c.AbortWithStatus(500)
+		log.Println(err)
+		return
+	}
+
+	// Serialize the statistics
+	c.JSON(200, stats)
 }

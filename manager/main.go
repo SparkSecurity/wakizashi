@@ -22,13 +22,21 @@ func main() {
 		c.String(418, "meow-tea")
 	})
 
-	// Setting up authentication
+	// For user based tasks
 	authRequired := router.Group("")
 	authRequired.Use(handler.AuthMiddleware)
 
 	authRequired.POST("/task", handler.CreateTask)
 	authRequired.GET("/task", handler.ListTask)
 	authRequired.PUT("/task", handler.CreatePages)
+
+	// For task based tasks
+	authTaskRequired := router.Group("")
+	authTaskRequired.Use(handler.AuthMiddleware)
+	authTaskRequired.Use(handler.AuthMiddlewareGetTask)
+
+	authTaskRequired.GET("/task/:id", handler.DownloadTask)
+	authTaskRequired.GET("/task/:id/statistics", handler.GetStats)
 
 	// Start
 	err := router.Run(fmt.Sprintf(":%d", config.Config.ListenPort))
