@@ -4,11 +4,19 @@ import (
 	"fmt"
 	"github.com/SparkSecurity/wakizashi/manager/config"
 	"github.com/SparkSecurity/wakizashi/manager/db"
+	docs "github.com/SparkSecurity/wakizashi/manager/docs"
 	"github.com/SparkSecurity/wakizashi/manager/handler"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title Wakizashi Scrape Platform Manager API
+// @securityDefinitions.apikey auth
+// @in header
+// @name token
 func main() {
+	docs.SwaggerInfo.InstanceName()
 	// Init the DB things
 	config.LoadConfig()
 	db.DBConnect()
@@ -21,7 +29,7 @@ func main() {
 	router.GET("/", func(c *gin.Context) {
 		c.String(418, "meow-tea")
 	})
-
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	// For user based tasks
 	authRequired := router.Group("")
 	authRequired.Use(handler.AuthMiddleware)

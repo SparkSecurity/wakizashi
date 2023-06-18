@@ -1,0 +1,242 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Wakizashi Scrape Platform Manager API",
+        "contact": {}
+    },
+    "paths": {
+        "/task": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "List all tasks created by the auth token",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "List tasks",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/handler.ListTaskResponse"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "Create a new task with the given urls",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Create a new task",
+                "parameters": [
+                    {
+                        "description": "Create Task Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreateTaskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreateTaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/task/{task_id}": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "description": "Download all pages for a given task at its current state into a zip file. The zip structure:\n.\n├── data\n│   ├── 44d45f44592c966e3049d15c6e2a50209d52168a55e82d2d31a058735304eea7\n│   ├── 72179dada963ca9f154ea2844b614b40b3ba38c7dd99208aaef2e9fd58cca19e\n│   ├── 7b6a484d04943fac714dadb783e8b0fb67fa1a94938507bde7a27b61682afd60\n│   └── 84bc159725f637822a5fc08e6e6551cc7cc1ce11681e6913f10a88b7fae8eef9\n└── index.json\nindex json contains the following structure:\n[\n{\n\"id\": \"\u003cpage id\u003e\",\n\"url\": \"\u003cpage url\u003e\",\n\"bodyHash\": \"\u003cpage body hash value\u003e\",\n}...\n]",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "summary": "Download pages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "zip file"
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Append pages to an existing task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreatePagesRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/task/{task_id}/statistics": {
+            "get": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get statistics for the specific task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.stats"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handler.CreatePagesRequest": {
+            "type": "object",
+            "required": [
+                "urls"
+            ],
+            "properties": {
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "handler.CreateTaskRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "urls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "handler.CreateTaskResponse": {
+            "type": "object",
+            "properties": {
+                "taskID": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.ListTaskResponse": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.stats": {
+            "type": "object",
+            "properties": {
+                "failed": {
+                    "type": "integer"
+                },
+                "inProgress": {
+                    "type": "integer"
+                },
+                "successful": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "auth": {
+            "type": "apiKey",
+            "name": "token",
+            "in": "header"
+        }
+    }
+}

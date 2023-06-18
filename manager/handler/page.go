@@ -16,7 +16,14 @@ type CreatePagesRequest struct {
 	Urls []string `json:"urls" binding:"required"`
 }
 
-// CreatePages is used for appending pages onto a task
+// CreatePages godoc
+// @Summary Append pages to an existing task
+// @Router /task/{task_id} [put]
+// @Param task_id path string true "Task ID"
+// @Accept json
+// @Param request body CreatePagesRequest true "Request body"
+// @Success 200
+// @Security auth
 func CreatePages(c *gin.Context) {
 	// Parse PUT request as json
 	var request CreatePagesRequest

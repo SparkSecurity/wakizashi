@@ -19,6 +19,19 @@ type CreateTaskRequest struct {
 	Urls []string `json:"urls"`
 }
 
+type CreateTaskResponse struct {
+	TaskID string `json:"taskID"`
+}
+
+// CreateTask godoc
+// @Summary Create a new task
+// @Description Create a new task with the given urls
+// @Accept json
+// @Produce json
+// @Router /task [post]
+// @Param request body handler.CreateTaskRequest true "Create Task Request"
+// @Success 200 {object} handler.CreateTaskResponse
+// @Security auth
 func CreateTask(c *gin.Context) {
 	// converting request to struct
 	var request CreateTaskRequest
@@ -55,6 +68,9 @@ func CreateTask(c *gin.Context) {
 			return nil, err
 		}
 
+		if len(request.Urls) == 0 {
+			return res, nil
+		}
 		// Insert each url into a page, then into the task
 		taskID := res.InsertedID.(primitive.ObjectID)
 		pages := make([]interface{}, len(request.Urls))
@@ -94,7 +110,20 @@ func CreateTask(c *gin.Context) {
 	})
 }
 
-// ListTask lists all tasks by a given user
+type ListTaskResponse struct {
+	ID        string `bson:"_id" json:"id"`
+	Name      string `bson:"name" json:"name"`
+	UserID    string `bson:"userID" json:"userID"`
+	CreatedAt string `bson:"createdAt" json:"createdAt"`
+}
+
+// ListTask godoc
+// @Summary List tasks
+// @Description List all tasks created by the auth token
+// @Produce json
+// @Router /task [get]
+// @Success 200 {array} handler.ListTaskResponse
+// @Security auth
 func ListTask(c *gin.Context) {
 	// Get the user and find tasks with their user id
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -122,7 +151,29 @@ func ListTask(c *gin.Context) {
 	c.JSON(200, tasks)
 }
 
-// DownloadTask downloads all pages for a given task at its current state
+// DownloadTask godoc
+// @Summary Download pages
+// @Description Download all pages for a given task at its current state into a zip file. The zip structure:
+// @Description .
+// @Description ├── data
+// @Description │   ├── 44d45f44592c966e3049d15c6e2a50209d52168a55e82d2d31a058735304eea7
+// @Description │   ├── 72179dada963ca9f154ea2844b614b40b3ba38c7dd99208aaef2e9fd58cca19e
+// @Description │   ├── 7b6a484d04943fac714dadb783e8b0fb67fa1a94938507bde7a27b61682afd60
+// @Description │   └── 84bc159725f637822a5fc08e6e6551cc7cc1ce11681e6913f10a88b7fae8eef9
+// @Description └── index.json
+// @Description index json contains the following structure:
+// @Description [
+// @Description   {
+// @Description     "id": "<page id>",
+// @Description     "url": "<page url>",
+// @Description     "bodyHash": "<page body hash value>",
+// @Description   }...
+// @Description ]
+// @Produce octet-stream
+// @Router /task/{task_id} [get]
+// @Param task_id path string true "Task ID"
+// @Success 200 "zip file"
+// @Security auth
 func DownloadTask(c *gin.Context) {
 	// Get the task from context
 	var task model.Task
@@ -174,6 +225,13 @@ func DownloadTask(c *gin.Context) {
 	})
 }
 
+// GetStats godoc
+// @Summary Get statistics for the specific task
+// @Produce json
+// @Router /task/{task_id}/statistics [get]
+// @Param task_id path string true "Task ID"
+// @Success 200 {object} handler.stats
+// @Security auth
 func GetStats(c *gin.Context) {
 	// Get the task from context
 	var task model.Task

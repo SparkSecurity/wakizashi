@@ -1,0 +1,166 @@
+definitions:
+  handler.CreatePagesRequest:
+    properties:
+      urls:
+        items:
+          type: string
+        type: array
+    required:
+    - urls
+    type: object
+  handler.CreateTaskRequest:
+    properties:
+      name:
+        type: string
+      urls:
+        items:
+          type: string
+        type: array
+    required:
+    - name
+    type: object
+  handler.CreateTaskResponse:
+    properties:
+      taskID:
+        type: string
+    type: object
+  handler.ListTaskResponse:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      userID:
+        type: string
+    type: object
+  handler.stats:
+    properties:
+      failed:
+        type: integer
+      inProgress:
+        type: integer
+      successful:
+        type: integer
+      total:
+        type: integer
+    type: object
+info:
+  contact: {}
+  title: Wakizashi Scrape Platform Manager API
+paths:
+  /task:
+    get:
+      description: List all tasks created by the auth token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handler.ListTaskResponse'
+            type: array
+      security:
+      - auth: []
+      summary: List tasks
+    post:
+      consumes:
+      - application/json
+      description: Create a new task with the given urls
+      parameters:
+      - description: Create Task Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.CreateTaskResponse'
+      security:
+      - auth: []
+      summary: Create a new task
+  /task/{task_id}:
+    get:
+      description: |-
+        Download all pages for a given task at its current state into a zip file. The zip structure:
+        .
+        ├── data
+        │   ├── 44d45f44592c966e3049d15c6e2a50209d52168a55e82d2d31a058735304eea7
+        │   ├── 72179dada963ca9f154ea2844b614b40b3ba38c7dd99208aaef2e9fd58cca19e
+        │   ├── 7b6a484d04943fac714dadb783e8b0fb67fa1a94938507bde7a27b61682afd60
+        │   └── 84bc159725f637822a5fc08e6e6551cc7cc1ce11681e6913f10a88b7fae8eef9
+        └── index.json
+        index json contains the following structure:
+        [
+        {
+        "id": "<page id>",
+        "url": "<page url>",
+        "bodyHash": "<page body hash value>",
+        }...
+        ]
+      parameters:
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: zip file
+      security:
+      - auth: []
+      summary: Download pages
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreatePagesRequest'
+      responses:
+        "200":
+          description: OK
+      security:
+      - auth: []
+      summary: Append pages to an existing task
+  /task/{task_id}/statistics:
+    get:
+      parameters:
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.stats'
+      security:
+      - auth: []
+      summary: Get statistics for the specific task
+securityDefinitions:
+  auth:
+    in: header
+    name: token
+    type: apiKey
+swagger: "2.0"
