@@ -1,7 +1,10 @@
-package main
+package scrape
 
 import (
+	"bytes"
 	"errors"
+	"github.com/SparkSecurity/wakizashi/worker/config"
+	"github.com/SparkSecurity/wakizashi/worker/storage"
 	"github.com/projectdiscovery/gologger"
 	"github.com/projectdiscovery/katana/pkg/engine/hybrid"
 	"github.com/projectdiscovery/katana/pkg/output"
@@ -14,7 +17,7 @@ import (
 var callbackMap = make(map[string]func(result *output.Result, err error))
 var Crawler *hybrid.Crawler
 
-func ScrapeInit() {
+func ScrapeInitBrowser() {
 	options := &types.Options{
 		MaxDepth:     1,                // Maximum depth to crawl
 		FieldScope:   "rdn",            // Crawling Scope Field
@@ -22,7 +25,7 @@ func ScrapeInit() {
 		RateLimit:    150,              // Maximum requests to send per second
 		Strategy:     "depth-first",    // Visit strategy (depth-first, breadth-first)
 		Timeout:      10,
-		Proxy:        Config.Proxy,
+		Proxy:        config.Config.Proxy,
 		OnResult: func(result output.Result) { // Callback function to execute for result
 			if callbackMap[result.Request.URL] == nil {
 				log.Println("No callback for url", result.Request.URL)
@@ -54,7 +57,7 @@ func ScrapeInit() {
 	}
 }
 
-func ScrapeHandler(task *ScrapeTask) error {
+func ScrapeHandlerBrowser(task *ScrapeTask) error {
 	ch := make(chan *output.Result)
 	errCh := make(chan error)
 	oldCallback := callbackMap[task.Url]
@@ -76,7 +79,11 @@ func ScrapeHandler(task *ScrapeTask) error {
 	}()
 	select {
 	case result := <-ch:
-		task.Response = result.Response.Body
+		fileId, err := storage.Storage.UploadFile(bytes.NewBufferString(result.Response.Body))
+		if err != nil {
+			return err
+		}
+		task.Response = fileId
 	case err := <-errCh:
 		return err
 	case <-time.After(17 * time.Second):
@@ -85,6 +92,6 @@ func ScrapeHandler(task *ScrapeTask) error {
 	return nil
 }
 
-func ScrapeClose() {
+func ScrapeCloseBrowser() {
 	_ = Crawler.Close()
 }

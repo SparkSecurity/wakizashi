@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/SparkSecurity/wakizashi/worker/config"
+	"github.com/SparkSecurity/wakizashi/worker/scrape"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 	"time"
@@ -14,7 +16,7 @@ var MQChan *amqp.Channel
 func MQConnect() {
 	// Connect mq
 	var err error
-	MQConn, err = amqp.Dial(Config.MQURI)
+	MQConn, err = amqp.Dial(config.Config.MQURI)
 	if err != nil {
 		panic(err)
 	}
@@ -30,14 +32,7 @@ func MQDisconnect() {
 	_ = MQConn.Close()
 }
 
-type ScrapeTask struct {
-	ID       string   `json:"id"`
-	Url      string   `json:"url"`
-	Response string   `json:"response"`
-	Error    []string `json:"error"`
-}
-
-func MQConsume(handler func(task *ScrapeTask) error) {
+func MQConsume(handler func(task *scrape.ScrapeTask) error) {
 	err := MQChan.Qos(2, 0, false)
 	if err != nil {
 		panic(err)
@@ -49,7 +44,7 @@ func MQConsume(handler func(task *ScrapeTask) error) {
 	for d := range msgs {
 		d := d
 		go func() {
-			var task ScrapeTask
+			var task scrape.ScrapeTask
 			err := json.Unmarshal(d.Body, &task)
 			if err != nil {
 				retry(&d)

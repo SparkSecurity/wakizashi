@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/Cyberax/go-nfs-client v1.0.1-0.20211103065114-eeba7350de5b // indirect
 	github.com/Mzack9999/go-http-digest-auth-client v0.6.1-0.20220414142836-eb8883508809 // indirect
 	github.com/PuerkitoBio/goquery v1.8.1 // indirect
 	github.com/akrylysov/pogreb v0.10.1 // indirect
