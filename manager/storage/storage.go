@@ -1,15 +1,17 @@
 package storage
 
 import (
-	"github.com/SparkSecurity/wakizashi/worker/config"
+	"github.com/SparkSecurity/wakizashi/manager/config"
 	"io"
 	"log"
 	"net/url"
+	"os"
 	"strconv"
 )
 
 type StorageInterface interface {
 	UploadFile(stream io.Reader) (fileId string, err error)
+	DownloadFile(fileId string) (stream io.Reader, err error)
 }
 
 var Storage StorageInterface
@@ -45,12 +47,14 @@ func CreateStorage() {
 			panic("NFS gid must be int")
 		}
 		storage := NFSStorage{}
-		err = storage.Init(uri.Host, uint32(uidInt), uint32(gidInt), uri.Query().Get("machineName"), uri.Path)
+		hostname, _ := os.Hostname()
+		err = storage.Init(uri.Host, uint32(uidInt), uint32(gidInt), hostname, uri.Path)
 		if err != nil {
 			panic(err)
 		}
 		log.Println("NFS storage initialized")
 		Storage = &storage
+		break
 	default:
 		panic("Unknown storage scheme! Supported storage scheme: nfs")
 	}

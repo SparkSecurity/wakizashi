@@ -1,8 +1,6 @@
 package storage
 
 import (
-	"crypto/sha256"
-	"fmt"
 	"github.com/sile16/go-nfs-client/nfs"
 	"github.com/sile16/go-nfs-client/nfs/rpc"
 	"io"
@@ -29,23 +27,7 @@ func (s *NFSStorage) Init(server string, uid, gid uint32, machineName string, ba
 	return
 }
 
-func (s *NFSStorage) UploadFile(stream io.Reader) (fileId string, err error) {
-	s256 := sha256.New()
-	// potential memory overuse
-	rawBytes, err := io.ReadAll(stream)
-	if err != nil {
-		return "", err
-	}
-	s256.Write(rawBytes)
-	fileId = fmt.Sprintf("%x", s256.Sum(nil))
-
-	if _, _, err := s.client.Lookup(fileId); err == nil { // file exists
-		return fileId, nil
-	}
+func (s *NFSStorage) DownloadFile(fileId string) (stream io.Reader, err error) {
 	f, err := s.client.OpenFile(fileId, 0644)
-	if err != nil {
-		return "", err
-	}
-	_, err = f.Write(rawBytes)
-	return
+	return f, err
 }

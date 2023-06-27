@@ -10,7 +10,8 @@ type PublisherConfig struct {
 	MongoURI    string
 	MongoDBName string
 
-	MQURI string
+	MQURI      string
+	StorageURI string
 }
 
 var Config PublisherConfig
@@ -28,4 +29,5 @@ func LoadConfig() {
 	Config.MongoURI = viper.GetString("MONGO_URI")
 	Config.MongoDBName = viper.GetString("MONGO_DB_NAME")
 	Config.MQURI = viper.GetString("MQ_URI")
+	Config.StorageURI = viper.GetString("STORAGE_URI")
 }

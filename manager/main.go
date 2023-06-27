@@ -6,6 +6,7 @@ import (
 	"github.com/SparkSecurity/wakizashi/manager/db"
 	docs "github.com/SparkSecurity/wakizashi/manager/docs"
 	"github.com/SparkSecurity/wakizashi/manager/handler"
+	"github.com/SparkSecurity/wakizashi/manager/storage"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -19,6 +20,7 @@ func main() {
 	docs.SwaggerInfo.InstanceName()
 	// Init the DB things
 	config.LoadConfig()
+	storage.CreateStorage()
 	db.DBConnect()
 	defer db.DBDisconnect()
 	db.MQConnect()

@@ -1,7 +1,6 @@
 package scrape
 
 import (
-	"bytes"
 	"errors"
 	"github.com/SparkSecurity/wakizashi/worker/config"
 	"github.com/SparkSecurity/wakizashi/worker/storage"
@@ -11,6 +10,7 @@ import (
 	"github.com/projectdiscovery/katana/pkg/types"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -50,7 +50,9 @@ func ScrapeInitBrowser() {
 	if err != nil {
 		gologger.Fatal().Msg(err.Error())
 	}
-	defer crawlerOptions.Close()
+	defer func(crawlerOptions *types.CrawlerOptions) {
+		_ = crawlerOptions.Close()
+	}(crawlerOptions)
 	Crawler, err = hybrid.New(crawlerOptions)
 	if err != nil {
 		gologger.Fatal().Msg(err.Error())
@@ -79,7 +81,7 @@ func ScrapeHandlerBrowser(task *ScrapeTask) error {
 	}()
 	select {
 	case result := <-ch:
-		fileId, err := storage.Storage.UploadFile(bytes.NewBufferString(result.Response.Body))
+		fileId, err := storage.Storage.UploadFile(strings.NewReader(result.Response.Body))
 		if err != nil {
 			return err
 		}

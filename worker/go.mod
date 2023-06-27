@@ -17,12 +17,16 @@ require (
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
+	github.com/bastjan/netstat v1.0.0 // indirect
+	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-rod/rod v0.112.8 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -31,6 +35,7 @@ require (
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/lukasbob/srcset v0.0.0-20190730101422-86b742e617f3 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible // indirect
 	github.com/microcosm-cc/bluemonday v1.0.23 // indirect
 	github.com/miekg/dns v1.1.52 // indirect
@@ -53,10 +58,17 @@ require (
 	github.com/projectdiscovery/stringsutil v0.0.2 // indirect
 	github.com/projectdiscovery/utils v0.0.19 // indirect
 	github.com/projectdiscovery/wappalyzergo v0.0.89 // indirect
+	github.com/prometheus/client_golang v1.14.0 // indirect
+	github.com/prometheus/client_model v0.3.0 // indirect
+	github.com/prometheus/common v0.37.0 // indirect
+	github.com/prometheus/procfs v0.8.0 // indirect
+	github.com/rasky/go-xdr v0.0.0-20170124162913-1a41d1a06c93 // indirect
 	github.com/remeh/sizedwaitgroup v1.0.0 // indirect
 	github.com/rs/xid v1.4.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20230101081208-5e3ef4b5456d // indirect
 	github.com/shirou/gopsutil/v3 v3.23.2 // indirect
+	github.com/sile16/go-nfs-client v0.0.0-20230203034125-b0f98e2df663 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/afero v1.9.5 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
@@ -93,6 +105,7 @@ require (
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/djherbis/times.v1 v1.3.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
