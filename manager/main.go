@@ -44,6 +44,7 @@ func main() {
 	taskRequired.Use(handler.AuthMiddlewareGetTask)
 
 	taskRequired.GET("/task/:id", handler.DownloadTask)
+	taskRequired.DELETE("/task/:id", handler.DeleteTask)
 	taskRequired.PUT("/task/:id", handler.CreatePages)
 	taskRequired.GET("/task/:id/statistics", handler.GetStats)
 

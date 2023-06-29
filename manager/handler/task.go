@@ -318,3 +318,46 @@ func getStatistics(taskID primitive.ObjectID) (*stats, error) {
 
 	return &result, nil
 }
+
+// DeleteTask godoc
+// @Summary Delete specific task
+// @Router /task/{task_id} [delete]
+// @Param task_id path string true "Task ID"
+// @Success 200
+// @Security auth
+func DeleteTask(c *gin.Context) {
+	// Get the task from context
+	var task model.Task
+	taskC, _ := c.Get("task")
+	task = taskC.(model.Task)
+
+	// 10 seconds to modify db
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Insert the pages into the db
+	session, err := db.MongoClient.StartSession()
+	if err != nil {
+		c.AbortWithStatus(500)
+		log.Println(err)
+		return
+	}
+	defer session.EndSession(ctx)
+	_, err = session.WithTransaction(ctx, func(ctx mongo.SessionContext) (interface{}, error) {
+		_, err := db.DB.Collection("task").DeleteOne(ctx, bson.D{
+			{"_id", task.ID},
+		})
+		if err != nil {
+			return nil, err
+		}
+		return db.DB.Collection("page").DeleteMany(ctx, bson.D{
+			{"taskID", task.ID},
+		})
+	})
+	if err != nil {
+		c.AbortWithStatus(500)
+		log.Println(err)
+		return
+	}
+	c.Status(200)
+}

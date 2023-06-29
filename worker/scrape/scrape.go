@@ -5,6 +5,7 @@ import (
 	"github.com/SparkSecurity/wakizashi/worker/config"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type ScrapeTask struct {
@@ -38,6 +39,7 @@ func ScrapeInit() {
 				InsecureSkipVerify: true,
 			},
 		},
+		Timeout: time.Duration(config.Config.HTTPTimeout) * time.Second,
 	}
 	ScrapeInitBrowser()
 }

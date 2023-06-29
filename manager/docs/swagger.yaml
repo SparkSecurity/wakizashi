@@ -87,6 +87,19 @@ paths:
       - auth: []
       summary: Create a new task
   /task/{task_id}:
+    delete:
+      parameters:
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      security:
+      - auth: []
+      summary: Delete specific task
     get:
       description: |-
         Download all pages for a given task at its current state into a zip file. The zip structure:

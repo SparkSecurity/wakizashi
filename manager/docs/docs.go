@@ -135,6 +135,28 @@ const docTemplate = `{
                         "description": "OK"
                     }
                 }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "auth": []
+                    }
+                ],
+                "summary": "Delete specific task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Task ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
             }
         },
         "/task/{task_id}/statistics": {
