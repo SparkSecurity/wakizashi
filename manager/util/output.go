@@ -38,6 +38,10 @@ func ZipFile(pages []model.Page, stream io.Writer) error {
 		if err != nil {
 			return err
 		}
+		err = stream.Close()
+		if err != nil {
+			return err
+		}
 		index = append(index, fileIndex{
 			ID:       page.ID.Hex(),
 			Url:      page.Url,

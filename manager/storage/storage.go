@@ -11,7 +11,7 @@ import (
 
 type StorageInterface interface {
 	UploadFile(stream io.Reader) (fileId string, err error)
-	DownloadFile(fileId string) (stream io.Reader, err error)
+	DownloadFile(fileId string) (stream io.ReadCloser, err error)
 }
 
 var Storage StorageInterface

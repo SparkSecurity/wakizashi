@@ -15,7 +15,7 @@ func (s *LocalPathStorage) Init(basePath string) (err error) {
 	return
 }
 
-func (s *LocalPathStorage) DownloadFile(fileId string) (stream io.Reader, err error) {
+func (s *LocalPathStorage) DownloadFile(fileId string) (stream io.ReadCloser, err error) {
 	f, err := os.OpenFile(s.basePath+"/"+fileId, os.O_RDONLY, 0)
 	if err != nil {
 		return nil, err

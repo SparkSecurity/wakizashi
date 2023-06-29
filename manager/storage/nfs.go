@@ -27,7 +27,11 @@ func (s *NFSStorage) Init(server string, uid, gid uint32, machineName string, ba
 	return
 }
 
-func (s *NFSStorage) DownloadFile(fileId string) (stream io.Reader, err error) {
-	f, err := s.client.OpenFile(fileId, 0644)
+func (s *NFSStorage) DownloadFile(fileId string) (stream io.ReadCloser, err error) {
+	f, err := s.client.Open(fileId)
+	if err != nil {
+		return nil, err
+	}
+	f.SetIODepth(4)
 	return f, err
 }

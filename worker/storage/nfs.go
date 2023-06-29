@@ -47,5 +47,9 @@ func (s *NFSStorage) UploadFile(stream io.Reader) (fileId string, err error) {
 		return "", err
 	}
 	_, err = f.Write(rawBytes)
+	if err != nil {
+		return "", err
+	}
+	err = f.Close()
 	return
 }
