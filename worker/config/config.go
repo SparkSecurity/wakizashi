@@ -3,9 +3,10 @@ package config
 import "github.com/spf13/viper"
 
 type PublisherConfig struct {
-	MQURI      string
-	Proxy      string
-	StorageURI string
+	MQURI          string
+	Proxy          string
+	StorageURI     string
+	BrowserTimeout int
 }
 
 var Config PublisherConfig
@@ -22,4 +23,5 @@ func LoadConfig() {
 	Config.MQURI = viper.GetString("MQ_URI")
 	Config.Proxy = viper.GetString("PROXY")
 	Config.StorageURI = viper.GetString("STORAGE_URI")
+	Config.BrowserTimeout = viper.GetInt("BROWSER_TIMEOUT")
 }

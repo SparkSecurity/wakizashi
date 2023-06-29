@@ -24,7 +24,7 @@ func ScrapeInitBrowser() {
 		BodyReadSize: 15 * 1024 * 1024, // Maximum response size to read
 		RateLimit:    150,              // Maximum requests to send per second
 		Strategy:     "depth-first",    // Visit strategy (depth-first, breadth-first)
-		Timeout:      10,
+		Timeout:      config.Config.BrowserTimeout,
 		Proxy:        config.Config.Proxy,
 		OnResult: func(result output.Result) { // Callback function to execute for result
 			if callbackMap[result.Request.URL] == nil {
@@ -91,7 +91,7 @@ func ScrapeHandlerBrowser(task *ScrapeTask) error {
 		task.Response = fileId
 	case err := <-errCh:
 		return err
-	case <-time.After(17 * time.Second):
+	case <-time.After(time.Duration(config.Config.BrowserTimeout+5) * time.Second):
 		return errors.New("timeout")
 	}
 	return nil
