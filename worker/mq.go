@@ -50,8 +50,10 @@ func MQConsume(handler func(task *scrape.ScrapeTask) error) {
 				retry(&d)
 				return
 			}
+			log.Println("Received task: ", task.ID, task.Url)
 			err = handler(&task)
 			if err != nil {
+				log.Println("Error when processing task: ", task.ID, task.Url, err.Error())
 				task.Error = append(task.Error, err.Error())
 				newBody, e := json.Marshal(task)
 				if e == nil {
@@ -84,6 +86,7 @@ func MQConsume(handler func(task *scrape.ScrapeTask) error) {
 				return
 			}
 			_ = d.Ack(false)
+			log.Println("Acked task: ", task.ID, task.Url)
 		}()
 	}
 }

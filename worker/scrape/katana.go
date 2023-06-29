@@ -30,6 +30,7 @@ func ScrapeInitBrowser() {
 		Proxy:        config.Config.Proxy,
 		OnResult: func(result output.Result) { // Callback function to execute for result
 			cbMapLock.Lock()
+			defer cbMapLock.Unlock()
 			if callbackMap[result.Request.URL] == nil {
 				log.Println("No callback for url", result.Request.URL)
 				return
@@ -46,7 +47,6 @@ func ScrapeInitBrowser() {
 			}
 			callbackMap[result.Request.URL](&result, nil)
 			delete(callbackMap, result.Request.URL)
-			cbMapLock.Unlock()
 		},
 		Headless: true,
 		HeadlessOptionalArguments: []string{
