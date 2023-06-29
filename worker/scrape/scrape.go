@@ -5,6 +5,7 @@ import (
 	"github.com/SparkSecurity/wakizashi/worker/config"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -20,7 +21,7 @@ var ProxyHTTPClient *http.Client
 func ScrapeHandler(task *ScrapeTask) error {
 	resp, err := ProxyHTTPClient.Get(task.Url)
 	// check if content-type is application/pdf
-	if err == nil && resp.Header.Get("Content-Type") == "application/pdf" {
+	if err == nil && !strings.Contains(resp.Header.Get("Content-Type"), "text/html") {
 		return ScrapeHandlerHttpClient(task, resp)
 	} else { // otherwise use browser to simulate (in case blocked by waf)
 		return ScrapeHandlerBrowser(task)
