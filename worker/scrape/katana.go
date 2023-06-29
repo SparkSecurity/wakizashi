@@ -11,10 +11,12 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
 var callbackMap = make(map[string]func(result *output.Result, err error))
+var cbMapLock sync.Mutex
 var Crawler *hybrid.Crawler
 
 func ScrapeInitBrowser() {
@@ -27,6 +29,7 @@ func ScrapeInitBrowser() {
 		Timeout:      config.Config.BrowserTimeout,
 		Proxy:        config.Config.Proxy,
 		OnResult: func(result output.Result) { // Callback function to execute for result
+			cbMapLock.Lock()
 			if callbackMap[result.Request.URL] == nil {
 				log.Println("No callback for url", result.Request.URL)
 				return
@@ -43,6 +46,7 @@ func ScrapeInitBrowser() {
 			}
 			callbackMap[result.Request.URL](&result, nil)
 			delete(callbackMap, result.Request.URL)
+			cbMapLock.Unlock()
 		},
 		Headless: true,
 		HeadlessOptionalArguments: []string{
@@ -65,6 +69,7 @@ func ScrapeInitBrowser() {
 func ScrapeHandlerBrowser(task *ScrapeTask) error {
 	ch := make(chan *output.Result)
 	errCh := make(chan error)
+	cbMapLock.Lock()
 	oldCallback := callbackMap[task.Url]
 	callbackMap[task.Url] = func(result *output.Result, err error) {
 		if err != nil {
@@ -76,6 +81,7 @@ func ScrapeHandlerBrowser(task *ScrapeTask) error {
 			oldCallback(result, err)
 		}
 	}
+	cbMapLock.Unlock()
 	go func() {
 		err := Crawler.Crawl(task.Url)
 		if err != nil {
