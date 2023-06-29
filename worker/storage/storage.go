@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/url"
+	"os"
 	"strconv"
 )
 
@@ -33,7 +34,7 @@ func CreateStorage() {
 		Storage = &storage
 		break
 	case "nfs":
-		if uri.Host == "" || uri.Path == "" || !uri.Query().Has("uid") || !uri.Query().Has("gid") || !uri.Query().Has("machineName") {
+		if uri.Host == "" || uri.Path == "" || !uri.Query().Has("uid") || !uri.Query().Has("gid") {
 			panic("NFS storage scheme parsing failed! Example: nfs://127.0.0.1:2049/datadir?uid=1000&gid=1000&machineName=worker1")
 		}
 		uidInt, err := strconv.Atoi(uri.Query().Get("uid"))
@@ -45,7 +46,12 @@ func CreateStorage() {
 			panic("NFS gid must be int")
 		}
 		storage := NFSStorage{}
-		err = storage.Init(uri.Host, uint32(uidInt), uint32(gidInt), uri.Query().Get("machineName"), uri.Path)
+		machineName := uri.Query().Get("machineName")
+		hostname, _ := os.Hostname()
+		if machineName == "" {
+			machineName = hostname
+		}
+		err = storage.Init(uri.Host, uint32(uidInt), uint32(gidInt), machineName, uri.Path)
 		if err != nil {
 			panic(err)
 		}
