@@ -7,6 +7,7 @@ type PublisherConfig struct {
 	Proxy          string
 	StorageURI     string
 	BrowserTimeout int
+	PrefetchCount  int
 }
 
 var Config PublisherConfig
@@ -24,4 +25,5 @@ func LoadConfig() {
 	Config.Proxy = viper.GetString("PROXY")
 	Config.StorageURI = viper.GetString("STORAGE_URI")
 	Config.BrowserTimeout = viper.GetInt("BROWSER_TIMEOUT")
+	Config.PrefetchCount = viper.GetInt("PREFETCH_COUNT")
 }

@@ -33,7 +33,7 @@ func MQDisconnect() {
 }
 
 func MQConsume(handler func(task *scrape.ScrapeTask) error) {
-	err := MQChan.Qos(2, 0, false)
+	err := MQChan.Qos(config.Config.PrefetchCount, 0, false)
 	if err != nil {
 		panic(err)
 	}

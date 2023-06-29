@@ -247,7 +247,7 @@ func GetStats(c *gin.Context) {
 	}
 
 	// Get the statistics
-	stats, err := GetStatistics(taskID)
+	stats, err := getStatistics(taskID)
 	if err != nil {
 		c.AbortWithStatus(500)
 		log.Println(err)
@@ -270,9 +270,9 @@ type aggregateResult struct {
 	Count  int64 `bson:"count"`
 }
 
-// GetStatistics is a helper function to get statistics for a given task
+// getStatistics is a helper function to get statistics for a given task
 // accepts a list of pages and returns a statistics struct
-func GetStatistics(taskID primitive.ObjectID) (*stats, error) {
+func getStatistics(taskID primitive.ObjectID) (*stats, error) {
 	ctx, cancel := util.TimeoutContext(5 * time.Second)
 	defer cancel()
 
@@ -287,7 +287,7 @@ func GetStatistics(taskID primitive.ObjectID) (*stats, error) {
 			{"$group", bson.D{
 				{"_id", "$status"},
 				{"count", bson.D{
-					{"$count", bson.D{}},
+					{"$sum", 1},
 				}},
 			}},
 		},
