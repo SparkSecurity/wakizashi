@@ -1,6 +1,11 @@
 package scrape
 
-import "net/http"
+import (
+	"crypto/tls"
+	"github.com/SparkSecurity/wakizashi/worker/config"
+	"net/http"
+	"net/url"
+)
 
 type ScrapeTask struct {
 	ID       string   `json:"id"`
@@ -9,8 +14,10 @@ type ScrapeTask struct {
 	Error    []string `json:"error"`
 }
 
+var ProxyHTTPClient *http.Client
+
 func ScrapeHandler(task *ScrapeTask) error {
-	resp, err := http.Get(task.Url)
+	resp, err := ProxyHTTPClient.Get(task.Url)
 	// check if content-type is application/pdf
 	if err == nil && resp.Header.Get("Content-Type") == "application/pdf" {
 		return ScrapeHandlerHttpClient(task, resp)
@@ -20,6 +27,18 @@ func ScrapeHandler(task *ScrapeTask) error {
 }
 
 func ScrapeInit() {
+	proxyUrl, err := url.Parse(config.Config.Proxy)
+	if err != nil {
+		panic(err)
+	}
+	ProxyHTTPClient = &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(proxyUrl),
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
 	ScrapeInitBrowser()
 }
 

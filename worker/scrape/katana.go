@@ -45,6 +45,9 @@ func ScrapeInitBrowser() {
 			delete(callbackMap, result.Request.URL)
 		},
 		Headless: true,
+		HeadlessOptionalArguments: []string{
+			"--ignore-certificate-errors",
+		},
 	}
 	crawlerOptions, err := types.NewCrawlerOptions(options)
 	if err != nil {
