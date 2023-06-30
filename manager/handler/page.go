@@ -64,7 +64,7 @@ func CreatePages(c *gin.Context) {
 			}
 		}
 	} else {
-		pages = make([]interface{}, len(request.Urls))
+		pages = make([]interface{}, len(request.Pages))
 		for i, page := range request.Pages {
 			pages[i] = model.Page{
 				ID:      primitive.NewObjectID(),
