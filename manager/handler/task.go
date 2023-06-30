@@ -15,8 +15,9 @@ import (
 )
 
 type CreateTaskRequest struct {
-	Name string   `json:"name" binding:"required"`
-	Urls []string `json:"urls"`
+	Name  string   `json:"name" binding:"required"`
+	Urls  []string `json:"urls"` // deprecated
+	Pages []Page   `json:"pages"`
 }
 
 type CreateTaskResponse struct {
@@ -68,18 +69,35 @@ func CreateTask(c *gin.Context) {
 			return nil, err
 		}
 
-		if len(request.Urls) == 0 {
+		if len(request.Urls) == 0 && len(request.Pages) == 0 {
 			return res, nil
 		}
 		// Insert each url into a page, then into the task
 		taskID := res.InsertedID.(primitive.ObjectID)
-		pages := make([]interface{}, len(request.Urls))
-		for i, url := range request.Urls {
-			pages[i] = model.Page{
-				ID:     primitive.NewObjectID(),
-				TaskID: taskID,
-				Url:    url,
-				Status: model.PAGE_STATUS_PENDING_SCRAPE,
+		var pages []interface{}
+		if len(request.Urls) > 0 {
+			pages = make([]interface{}, len(request.Urls))
+			for i, url := range request.Urls {
+				pages[i] = model.Page{
+					ID:      primitive.NewObjectID(),
+					TaskID:  taskID,
+					Url:     url,
+					Browser: false,
+					Note:    "",
+					Status:  model.PAGE_STATUS_PENDING_SCRAPE,
+				}
+			}
+		} else {
+			pages = make([]interface{}, len(request.Urls))
+			for i, page := range request.Pages {
+				pages[i] = model.Page{
+					ID:      primitive.NewObjectID(),
+					TaskID:  taskID,
+					Url:     page.Url,
+					Browser: page.Browser,
+					Note:    page.Note,
+					Status:  model.PAGE_STATUS_PENDING_SCRAPE,
+				}
 			}
 		}
 		pageRes, err := db.DB.Collection("page").InsertMany(ctx, pages) // Actually insert the pages
@@ -88,8 +106,9 @@ func CreateTask(c *gin.Context) {
 		}
 		for i, pageID := range pageRes.InsertedIDs {
 			err := db.PublishScrapeTask(db.ScrapeTask{
-				ID:  pageID.(primitive.ObjectID).Hex(),
-				Url: request.Urls[i],
+				ID:      pageID.(primitive.ObjectID).Hex(),
+				Url:     pages[i].(model.Page).Url,
+				Browser: pages[i].(model.Page).Browser,
 			})
 			if err != nil {
 				log.Println(err)
