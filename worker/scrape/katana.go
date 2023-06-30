@@ -19,7 +19,7 @@ var callbackMap = make(map[string]func(result *output.Result, err error))
 var cbMapLock sync.Mutex
 var Crawler *hybrid.Crawler
 
-func ScrapeInitBrowser() {
+func InitBrowser() {
 	options := &types.Options{
 		MaxDepth:     1,                              // Maximum depth to crawl
 		FieldScope:   "rdn",                          // Crawling Scope Field
@@ -66,7 +66,7 @@ func ScrapeInitBrowser() {
 	}
 }
 
-func ScrapeHandlerBrowser(task *ScrapeTask) error {
+func HandlerBrowser(task *Task) error {
 	ch := make(chan *output.Result)
 	errCh := make(chan error)
 	cbMapLock.Lock()
@@ -103,6 +103,6 @@ func ScrapeHandlerBrowser(task *ScrapeTask) error {
 	return nil
 }
 
-func ScrapeCloseBrowser() {
+func CloseBrowser() {
 	_ = Crawler.Close()
 }

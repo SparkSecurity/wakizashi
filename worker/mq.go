@@ -32,7 +32,7 @@ func MQDisconnect() {
 	_ = MQConn.Close()
 }
 
-func MQConsume(handler func(task *scrape.ScrapeTask) error) {
+func MQConsume(handler func(task *scrape.Task) error) {
 	err := MQChan.Qos(config.Config.PrefetchCount, 0, false)
 	if err != nil {
 		panic(err)
@@ -44,7 +44,7 @@ func MQConsume(handler func(task *scrape.ScrapeTask) error) {
 	for d := range msgs {
 		d := d
 		go func() {
-			var task scrape.ScrapeTask
+			var task scrape.Task
 			err := json.Unmarshal(d.Body, &task)
 			if err != nil {
 				retry(&d)

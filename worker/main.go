@@ -11,7 +11,7 @@ func main() {
 	storage.CreateStorage()
 	MQConnect()
 	defer MQDisconnect()
-	scrape.ScrapeInit()
-	defer scrape.ScrapeClose()
-	MQConsume(scrape.ScrapeHandler)
+	scrape.Init()
+	defer scrape.Close()
+	MQConsume(scrape.Handler)
 }
