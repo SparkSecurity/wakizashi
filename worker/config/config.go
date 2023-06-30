@@ -3,12 +3,13 @@ package config
 import "github.com/spf13/viper"
 
 type PublisherConfig struct {
-	MQURI          string
-	Proxy          string
-	StorageURI     string
-	BrowserTimeout int
-	HTTPTimeout    int
-	PrefetchCount  int
+	MQURI            string
+	Proxy            string
+	StorageURI       string
+	BrowserTimeout   int
+	HTTPTimeout      int
+	PrefetchCount    int
+	BrowserRateLimit int
 }
 
 var Config PublisherConfig
@@ -28,4 +29,5 @@ func LoadConfig() {
 	Config.BrowserTimeout = viper.GetInt("BROWSER_TIMEOUT")
 	Config.HTTPTimeout = viper.GetInt("HTTP_TIMEOUT")
 	Config.PrefetchCount = viper.GetInt("PREFETCH_COUNT")
+	Config.BrowserRateLimit = viper.GetInt("BROWSER_RATE_LIMIT")
 }

@@ -139,6 +139,7 @@ type ScrapeTask struct {
 	Url      string   `json:"url"`
 	Response string   `json:"response,omitempty"`
 	Error    []string `json:"error,omitempty"`
+	Browser  bool     `json:"browser"`
 }
 
 // PublishScrapeTask publishes a scrape task to the queue, allowing the worker to scrape the page

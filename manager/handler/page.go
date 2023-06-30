@@ -12,8 +12,15 @@ import (
 	"time"
 )
 
+type Page struct {
+	Url     string `json:"url"`
+	Browser bool   `json:"browser"`
+	Note    string `json:"note"`
+}
+
 type CreatePagesRequest struct {
-	Urls []string `json:"urls" binding:"required"`
+	Urls  []string `json:"urls"` // deprecated
+	Pages []Page   `json:"pages"`
 }
 
 // CreatePages godoc
@@ -43,13 +50,30 @@ func CreatePages(c *gin.Context) {
 	defer cancel()
 
 	// Make an array to store pages to add to db
-	pages := make([]interface{}, len(request.Urls))
-	for i, url := range request.Urls {
-		pages[i] = model.Page{
-			ID:     primitive.NewObjectID(),
-			TaskID: task.ID,
-			Url:    url,
-			Status: model.PAGE_STATUS_PENDING_SCRAPE,
+	var pages []interface{}
+	if len(request.Urls) > 0 {
+		pages = make([]interface{}, len(request.Urls))
+		for i, url := range request.Urls {
+			pages[i] = model.Page{
+				ID:      primitive.NewObjectID(),
+				TaskID:  task.ID,
+				Url:     url,
+				Browser: false,
+				Note:    "",
+				Status:  model.PAGE_STATUS_PENDING_SCRAPE,
+			}
+		}
+	} else {
+		pages = make([]interface{}, len(request.Urls))
+		for i, page := range request.Pages {
+			pages[i] = model.Page{
+				ID:      primitive.NewObjectID(),
+				TaskID:  task.ID,
+				Url:     page.Url,
+				Browser: page.Browser,
+				Note:    page.Note,
+				Status:  model.PAGE_STATUS_PENDING_SCRAPE,
+			}
 		}
 	}
 
@@ -71,8 +95,9 @@ func CreatePages(c *gin.Context) {
 	}
 	for i, pageID := range pageRes.(*mongo.InsertManyResult).InsertedIDs {
 		err := db.PublishScrapeTask(db.ScrapeTask{
-			ID:  pageID.(primitive.ObjectID).Hex(),
-			Url: request.Urls[i],
+			ID:      pageID.(primitive.ObjectID).Hex(),
+			Url:     pages[i].(model.Page).Url,
+			Browser: pages[i].(model.Page).Browser,
 		})
 		if err != nil {
 			log.Println(err)
