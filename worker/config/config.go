@@ -10,6 +10,7 @@ type PublisherConfig struct {
 	HTTPTimeout      int
 	PrefetchCount    int
 	BrowserRateLimit int
+	BrowserWait      int
 }
 
 var Config PublisherConfig
@@ -30,4 +31,5 @@ func LoadConfig() {
 	Config.HTTPTimeout = viper.GetInt("HTTP_TIMEOUT")
 	Config.PrefetchCount = viper.GetInt("PREFETCH_COUNT")
 	Config.BrowserRateLimit = viper.GetInt("BROWSER_RATE_LIMIT")
+	Config.BrowserWait = viper.GetInt("BROWSER_WAIT")
 }

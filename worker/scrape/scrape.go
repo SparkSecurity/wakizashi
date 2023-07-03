@@ -10,7 +10,7 @@ type Task struct {
 
 func Handler(task *Task) error {
 	if task.Browser {
-		return HandlerBrowser(task)
+		return HandlerBrowserNew(task)
 	} else {
 		return HandlerHttpClient(task)
 	}
@@ -18,9 +18,9 @@ func Handler(task *Task) error {
 
 func Init() {
 	InitHttpClient()
-	InitBrowser()
+	InitBrowserNew()
 }
 
 func Close() {
-	CloseBrowser()
+	CloseBrowserNew()
 }
