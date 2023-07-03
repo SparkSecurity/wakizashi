@@ -191,6 +191,7 @@ func ListTask(c *gin.Context) {
 // @Produce octet-stream
 // @Router /task/{task_id} [get]
 // @Param task_id path string true "Task ID"
+// @Param indexOnly query string false "true/false: Only download index json"
 // @Success 200 "zip file"
 // @Security auth
 func DownloadTask(c *gin.Context) {
@@ -200,7 +201,7 @@ func DownloadTask(c *gin.Context) {
 	task = taskC.(model.Task)
 
 	// Get all pages for the task
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	cursor, err := db.DB.Collection("page").Find(ctx, bson.D{
@@ -234,12 +235,11 @@ func DownloadTask(c *gin.Context) {
 	c.Writer.Header().Set("Content-type", "application/octet-stream")
 	c.Writer.Header().Set("Content-Disposition", `attachment; filename=`+task.Name+`.zip`)
 	c.Stream(func(w io.Writer) bool {
-		err := util.ZipFile(successfulPages, w)
+		err := util.ZipFile(successfulPages, w, c.Query("indexOnly") == "true")
 		if err != nil {
 			log.Println(err)
 			return false
 		}
-
 		return false
 	})
 }

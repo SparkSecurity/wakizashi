@@ -94,6 +94,12 @@ const docTemplate = `{
                         "name": "task_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "true/false: Only download index json",
+                        "name": "indexOnly",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -193,11 +199,15 @@ const docTemplate = `{
     "definitions": {
         "handler.CreatePagesRequest": {
             "type": "object",
-            "required": [
-                "urls"
-            ],
             "properties": {
+                "pages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.Page"
+                    }
+                },
                 "urls": {
+                    "description": "deprecated",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -214,7 +224,14 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "pages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.Page"
+                    }
+                },
                 "urls": {
+                    "description": "deprecated",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -243,6 +260,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.Page": {
+            "type": "object",
+            "properties": {
+                "browser": {
+                    "type": "boolean"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"bufio"
 	"github.com/sile16/go-nfs-client/nfs"
 	"github.com/sile16/go-nfs-client/nfs/rpc"
 	"io"
@@ -27,11 +28,19 @@ func (s *NFSStorage) Init(server string, uid, gid uint32, machineName string, ba
 	return
 }
 
+type readCloser struct {
+	io.Reader
+	io.Closer
+}
+
 func (s *NFSStorage) DownloadFile(fileId string) (stream io.ReadCloser, err error) {
 	f, err := s.client.Open(fileId)
 	if err != nil {
 		return nil, err
 	}
-	f.SetIODepth(4)
-	return f, err
+	f.SetIODepth(32)
+	return &readCloser{
+		bufio.NewReaderSize(f, 1*1024*1024),
+		f,
+	}, nil
 }

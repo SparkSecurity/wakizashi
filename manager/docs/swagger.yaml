@@ -1,18 +1,26 @@
 definitions:
   handler.CreatePagesRequest:
     properties:
+      pages:
+        items:
+          $ref: '#/definitions/handler.Page'
+        type: array
       urls:
+        description: deprecated
         items:
           type: string
         type: array
-    required:
-    - urls
     type: object
   handler.CreateTaskRequest:
     properties:
       name:
         type: string
+      pages:
+        items:
+          $ref: '#/definitions/handler.Page'
+        type: array
       urls:
+        description: deprecated
         items:
           type: string
         type: array
@@ -33,6 +41,15 @@ definitions:
       name:
         type: string
       userID:
+        type: string
+    type: object
+  handler.Page:
+    properties:
+      browser:
+        type: boolean
+      note:
+        type: string
+      url:
         type: string
     type: object
   handler.stats:
@@ -123,6 +140,10 @@ paths:
         in: path
         name: task_id
         required: true
+        type: string
+      - description: 'true/false: Only download index json'
+        in: query
+        name: indexOnly
         type: string
       produces:
       - application/octet-stream
