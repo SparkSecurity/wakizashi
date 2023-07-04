@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-var ProxyHTTPClient *http.Client
-
 // ChromeHeaders Copy from Chrome DevTools Raw Headers, and remove Host & Accept-Encoding
 const ChromeHeaders = `
 Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
@@ -36,6 +34,7 @@ type kv struct {
 }
 
 var headerList []kv
+var proxyUrl *url.URL
 
 type Transport struct {
 	ProxyTransport *http.Transport
@@ -49,6 +48,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func InitHttpClient() {
+	var err error
 	lines := strings.Split(ChromeHeaders, "\n")
 	for _, line := range lines {
 		if line == "" {
@@ -60,11 +60,14 @@ func InitHttpClient() {
 			Value: strings.TrimSpace(parts[1]),
 		})
 	}
-	proxyUrl, err := url.Parse(config.Config.Proxy)
+	proxyUrl, err = url.Parse(config.Config.Proxy)
 	if err != nil {
 		panic(err)
 	}
-	ProxyHTTPClient = &http.Client{
+}
+
+func HandlerHttpClient(task *Task) error {
+	client := &http.Client{
 		Transport: &Transport{&http.Transport{
 			Proxy: http.ProxyURL(proxyUrl),
 			TLSClientConfig: &tls.Config{
@@ -73,10 +76,7 @@ func InitHttpClient() {
 		}},
 		Timeout: time.Duration(config.Config.HTTPTimeout) * time.Second,
 	}
-}
-
-func HandlerHttpClient(task *Task) error {
-	resp, err := ProxyHTTPClient.Get(task.Url)
+	resp, err := client.Get(task.Url)
 	if err != nil {
 		return err
 	}
