@@ -17,8 +17,11 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
     && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
     && apt-get update && apt-get -y install google-chrome-stable
 
-COPY --from=builder /src/worker /app/worker
-COPY run.sh /app/run.sh
+RUN groupadd user && useradd -m -g user user
+USER user
+
+COPY --from=builder --chown=user:user /src/worker /app/worker
+COPY --chown=user:user run.sh /app/run.sh
 
 ENV PROXY socks5://127.0.0.1:7777
 
