@@ -2,6 +2,8 @@ package scrape
 
 import (
 	"crypto/tls"
+	"errors"
+	"fmt"
 	"github.com/SparkSecurity/wakizashi/worker/config"
 	"github.com/SparkSecurity/wakizashi/worker/storage"
 	"net/http"
@@ -77,6 +79,9 @@ func HandlerHttpClient(task *Task) error {
 	resp, err := ProxyHTTPClient.Get(task.Url)
 	if err != nil {
 		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(fmt.Sprintf("http status code is %d", resp.StatusCode))
 	}
 	fileId, err := storage.Storage.UploadFile(resp.Body)
 	_ = resp.Body.Close()
