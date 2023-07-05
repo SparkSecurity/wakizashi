@@ -45,7 +45,7 @@ func CreateTask(c *gin.Context) {
 	user := GetUser(c)
 
 	// 10 second to create the task
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	session, err := db.MongoClient.StartSession()

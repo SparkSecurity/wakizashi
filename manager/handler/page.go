@@ -46,7 +46,7 @@ func CreatePages(c *gin.Context) {
 	task = taskC.(model.Task)
 
 	// 10 seconds to modify db
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	// Make an array to store pages to add to db
