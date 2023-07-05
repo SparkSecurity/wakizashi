@@ -100,13 +100,26 @@ func CreateTask(c *gin.Context) {
 				}
 			}
 		}
-		pageRes, err := db.DB.Collection("page").InsertMany(ctx, pages) // Actually insert the pages
+		insertedIDs := make([]primitive.ObjectID, len(pages))
+		for i := 0; i < len(pages); i += 1000 {
+			end := i + 1000
+			if end > len(pages) {
+				end = len(pages)
+			}
+			pageRes, err := db.DB.Collection("page").InsertMany(ctx, pages[i:end])
+			if err != nil {
+				return nil, err
+			}
+			for j, pageID := range pageRes.InsertedIDs {
+				insertedIDs[i+j] = pageID.(primitive.ObjectID)
+			}
+		}
 		if err != nil {
 			return nil, err
 		}
-		for i, pageID := range pageRes.InsertedIDs {
+		for i, pageID := range insertedIDs {
 			err := db.PublishScrapeTask(db.ScrapeTask{
-				ID:      pageID.(primitive.ObjectID).Hex(),
+				ID:      pageID.Hex(),
 				Url:     pages[i].(model.Page).Url,
 				Browser: pages[i].(model.Page).Browser,
 			})

@@ -85,23 +85,40 @@ func CreatePages(c *gin.Context) {
 		return
 	}
 	defer session.EndSession(ctx)
-	pageRes, err := session.WithTransaction(ctx, func(ctx mongo.SessionContext) (interface{}, error) {
-		return db.DB.Collection("page").InsertMany(ctx, pages)
+	_, err = session.WithTransaction(ctx, func(ctx mongo.SessionContext) (interface{}, error) {
+		insertedIDs := make([]primitive.ObjectID, len(pages))
+		for i := 0; i < len(pages); i += 1000 {
+			end := i + 1000
+			if end > len(pages) {
+				end = len(pages)
+			}
+			res, err := db.DB.Collection("page").InsertMany(ctx, pages[i:end])
+			if err != nil {
+				return nil, err
+			}
+			for j, pageID := range res.InsertedIDs {
+				insertedIDs[i+j] = pageID.(primitive.ObjectID)
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+		for i, pageID := range insertedIDs {
+			err := db.PublishScrapeTask(db.ScrapeTask{
+				ID:      pageID.Hex(),
+				Url:     pages[i].(model.Page).Url,
+				Browser: pages[i].(model.Page).Browser,
+			})
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		return nil, nil
 	})
 	if err != nil {
 		c.AbortWithStatus(500)
 		log.Println(err)
 		return
-	}
-	for i, pageID := range pageRes.(*mongo.InsertManyResult).InsertedIDs {
-		err := db.PublishScrapeTask(db.ScrapeTask{
-			ID:      pageID.(primitive.ObjectID).Hex(),
-			Url:     pages[i].(model.Page).Url,
-			Browser: pages[i].(model.Page).Browser,
-		})
-		if err != nil {
-			log.Println(err)
-		}
 	}
 	c.Status(200)
 }
