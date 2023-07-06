@@ -17,6 +17,7 @@ type fileIndex struct {
 	ID       string `json:"id"`
 	Url      string `json:"url"`
 	BodyHash string `json:"bodyHash"`
+	Note string `json:"note"`
 }
 
 type file struct {
@@ -123,6 +124,7 @@ func ZipFile(pages []model.Page, stream io.Writer, indexOnly bool) error {
 				ID:       page.ID.Hex(),
 				Url:      page.Url,
 				BodyHash: page.Response,
+				Note:     page.Note,
 			})
 		}
 	}
