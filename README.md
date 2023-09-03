@@ -29,7 +29,7 @@ docker run --name wakizashi-worker -d --restart always -e MQ_URI="amqp://guest:<
 
 ## API
 
-Swagger Doc: <manager endpoint>/docs
+Swagger Doc: \<manager endpoint\>/docs
 
 ## API (deprecated)
 
