@@ -1,5 +1,9 @@
 # Wakizashi Scrape Platform
 
+## Credit
+
+[Tencent Security Xuanwu Lab](https://xlab.tencent.com/en/)
+
 ## Architecture
 
 Wakizashi has two components: manager and worker.
