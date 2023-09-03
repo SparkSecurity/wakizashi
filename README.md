@@ -12,6 +12,8 @@ Worker is a daemon that runs on different machines and executes scraping tasks.
 
 ### Manager
 
+[All configurations](https://github.com/SparkSecurity/wakizashi/blob/main/manager/config/config.go)
+
 1. Switch to `docker` folder
 2. Replace `mq_pass` in `.env` with a random password, that will be used for worker to connect MQ.
 3. Run `docker-compose up -d`
@@ -19,11 +21,17 @@ Worker is a daemon that runs on different machines and executes scraping tasks.
 
 ### Worker
 
+[All configurations](https://github.com/SparkSecurity/wakizashi/blob/main/worker/config/config.go)
+
 ```bash
 docker run --name wakizashi-worker -d --restart always -e MQ_URI="amqp://guest:<mq_pass>@<ip>:5672" ghcr.io/sparksecurity/wakizashi-worker:main
 ```
 
 ## API
+
+Swagger Doc: <manager endpoint>/docs
+
+## API (deprecated)
 
 ### Submit a task
 
