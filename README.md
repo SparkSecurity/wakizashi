@@ -31,11 +31,69 @@ Worker is a daemon that runs on different machines and executes scraping tasks.
 docker run --name wakizashi-worker -d --restart always -e MQ_URI="amqp://guest:<mq_pass>@<ip>:5672" ghcr.io/sparksecurity/wakizashi-worker:main
 ```
 
-## API
 
-Swagger Doc: \<manager endpoint\>/docs
 
-## API (deprecated)
+## Quick start
+
+To get started quickly, you can use the api_client.py script provided in the repository.
+1. Set default api endpoint & token
+```
+export API_ENDPOINT=http://<manager_ip>:3033/
+export API_TOKEN=<your token>
+
+```
+
+2. Create a new crawler task
+```
+python api_client.py  create --url_list tmp/urls.txt --name test_task 
+
+output:
+Task created: test_task, TaskID: <task_id>
+
+```
+
+3. add a list of urls into the task
+
+```
+echo "https://www.baidu.com" > /tmp/urls.txt
+python api_client.py  add --url_list /tmp/urls.txt --id <task_id>
+
+output:
+1 URLs added to task <task_id>
+
+```
+
+
+4. The state of the task can be accuired by following command
+```
+python api_client.py stats --id 65276649a07719081327a997
+
+output:
+{
+    "total": 1,
+    "successful": 1,
+    "failed": 0,
+    "inProgress": 0
+}
+
+5. Once all the urls are fetched successfully, the fetched pages can be downloaded by following command
+```
+python api_client.py download --output  <path_to_output>  --id <task_id> 
+```
+
+The downloaded file is a zip file that contains an index.json file structured as follows:
+
+```
+[{"id":"<task_id>","url":"https://www.baidu.com","bodyHash":"f422a3ee34856088e2ee41a9bbf6dec86c3a0e3e3c125245b49f36a5632960af","note":""}]
+```
+
+Additionally, there is a directory "data" that contains files named by bodyHash, which represents the corresponding page content.
+
+
+```
+
+## Using API
+Swagger Doc: \<manager endpoint\>/swagger/index.html
 
 ### Submit a task
 

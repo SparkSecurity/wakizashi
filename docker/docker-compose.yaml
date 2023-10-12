@@ -40,6 +40,7 @@ services:
       MONGO_URI: "mongodb://mongo:27017/?replicaSet=rs0&directConnection=true"
       MONGO_DB_NAME: "wakizashi"
       MQ_URI: "amqp://guest:${mq_pass}@rabbit:5672"
+      STORAGE_URI: ${storage_uri}
     ports:
       - "3033:3033"
     depends_on:
@@ -48,15 +49,17 @@ services:
     networks:
       - wakizashi
 
-#  worker:
-#    image: ghcr.io/sparksecurity/wakizashi-worker:main
-#    restart: always
-#    environment:
-#      MQ_URI: "amqp://guest:${mq_pass}@rabbit:5672"
-#    depends_on:
-#      - manager
-#    networks:
-#      - wakizashi
+  worker:
+    image: ghcr.io/sparksecurity/wakizashi-worker:main
+    restart: always
+    environment:
+      MQ_URI: "amqp://guest:${mq_pass}@rabbit:5672"
+      STORAGE_URI: ${storage_uri}
+      PROXY: ${proxy_pool_url}
+    depends_on:
+      - manager
+    networks:
+      - wakizashi
 
 networks:
   wakizashi:
