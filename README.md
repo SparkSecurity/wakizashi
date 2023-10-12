@@ -40,7 +40,6 @@ To get started quickly, you can use the api_client.py script provided in the rep
 ```
 export API_ENDPOINT=http://<manager_ip>:3033/
 export API_TOKEN=<your token>
-
 ```
 
 2. Create a new crawler task
@@ -49,7 +48,6 @@ python api_client.py  create --url_list tmp/urls.txt --name test_task
 
 output:
 Task created: test_task, TaskID: <task_id>
-
 ```
 
 3. add a list of urls into the task
@@ -60,7 +58,6 @@ python api_client.py  add --url_list /tmp/urls.txt --id <task_id>
 
 output:
 1 URLs added to task <task_id>
-
 ```
 
 
@@ -75,12 +72,12 @@ output:
     "failed": 0,
     "inProgress": 0
 }
+```
 
 5. Once all the urls are fetched successfully, the fetched pages can be downloaded by following command
 ```
 python api_client.py download --output  <path_to_output>  --id <task_id> 
 ```
-
 The downloaded file is a zip file that contains an index.json file structured as follows:
 
 ```
@@ -89,8 +86,6 @@ The downloaded file is a zip file that contains an index.json file structured as
 
 Additionally, there is a directory "data" that contains files named by bodyHash, which represents the corresponding page content.
 
-
-```
 
 ## Using API
 Swagger Doc: \<manager endpoint\>/swagger/index.html
